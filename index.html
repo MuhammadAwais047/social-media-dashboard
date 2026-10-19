@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orbit — Social media dashboard</title>
+  <meta name="description" content="Orbit is a social media analytics dashboard demo built with pure vanilla JavaScript — follower growth, engagement insight, content library and scheduling. No frameworks." />
+  <meta property="og:title" content="Orbit — Social media dashboard" />
+  <meta property="og:description" content="A social media analytics dashboard demo in pure vanilla JavaScript." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#0b0e14" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AA%90%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <a class="brand" href="./" aria-label="Orbit home">
+        <span class="brand-mark" aria-hidden="true">🪐</span>
+        <span>Orbit</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Dashboard sections">
+        <button class="nav-link active" type="button" data-view="overview" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/></svg>
+          Overview
+        </button>
+        <button class="nav-link" type="button" data-view="analytics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M6 20V11"/><path d="M11 20V5"/><path d="M16 20v-6"/><path d="M21 20V8"/></svg>
+          Analytics
+        </button>
+        <button class="nav-link" type="button" data-view="content">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18"/><path d="m9 13.5 4 2.5-4 2.5z"/></svg>
+          Content
+        </button>
+        <button class="nav-link" type="button" data-view="audience">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.8a3.4 3.4 0 0 1 0 6.4"/><path d="M17.5 14.2A6.5 6.5 0 0 1 21.5 20"/></svg>
+          Audience
+        </button>
+      </nav>
+
+      <div class="goal">
+        <p class="goal-kicker">Monthly publishing goal</p>
+        <p class="goal-count"><b id="goal-done">0</b> / 15 posts</p>
+        <div class="goal-bar"><span id="goal-bar"></span></div>
+        <p class="goal-note" id="goal-note">Keep the streak going.</p>
+      </div>
+
+      <div class="profile">
+        <span class="avatar" aria-hidden="true">MC</span>
+        <div class="profile-info">
+          <b>Maya Chen</b>
+          <span>Creator · @mayacreates</span>
+        </div>
+        <span class="demo-tag">Demo</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="heading">
+          <p class="eyebrow" id="today-label">Today</p>
+          <h1 id="page-title">Overview</h1>
+        </div>
+        <div class="top-actions">
+          <div class="seg" role="group" aria-label="Time range">
+            <button type="button" data-range="7">7D</button>
+            <button type="button" data-range="30" class="active">30D</button>
+            <button type="button" data-range="90">90D</button>
+          </div>
+          <button type="button" class="btn primary" id="new-post-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            New post
+          </button>
+        </div>
+      </header>
+
+      <!-- ==================== OVERVIEW ==================== -->
+      <section class="view active" data-view="overview" aria-labelledby="page-title">
+        <div class="insight" id="insight">
+          <span class="insight-ico" aria-hidden="true">⚡</span>
+          <p><b>TikTok reach is up 24% this week.</b> Short clips posted before 6 PM are beating your average by 1.8× — double down while it lasts.</p>
+          <button type="button" class="icon-btn" id="dismiss-insight" aria-label="Dismiss insight">✕</button>
+        </div>
+
+        <div class="kpis" id="kpis"></div>
+
+        <div class="grid-main">
+          <article class="card chart-card">
+            <div class="card-head">
+              <div>
+                <h2>Audience growth</h2>
+                <p class="sub" id="chart-sub">Total followers across all platforms</p>
+              </div>
+              <div class="chips" id="metric-chips" role="group" aria-label="Chart metric">
+                <button type="button" class="chip active" data-metric="followers">Followers</button>
+                <button type="button" class="chip" data-metric="reach">Reach</button>
+                <button type="button" class="chip" data-metric="engagement">Engagement</button>
+              </div>
+            </div>
+            <div class="chart-wrap" id="chart-wrap">
+              <svg id="growth-chart" viewBox="0 0 720 268" role="img" aria-label="Follower growth chart"></svg>
+              <div class="chart-tip" id="chart-tip" hidden>
+                <span class="tip-date"></span>
+                <b class="tip-value"></b>
+              </div>
+            </div>
+            <div class="chips platform-chips" id="chart-platforms" role="group" aria-label="Filter chart by platform">
+              <button type="button" class="pchip active" data-platform="all"><span class="pdot" style="--c:#8b93ff"></span>All</button>
+              <button type="button" class="pchip" data-platform="instagram"><span class="pdot" style="--c:#e1306c"></span>Instagram</button>
+              <button type="button" class="pchip" data-platform="tiktok"><span class="pdot" style="--c:#25f4ee"></span>TikTok</button>
+              <button type="button" class="pchip" data-platform="x"><span class="pdot" style="--c:#e7e9ea"></span>X</button>
+              <button type="button" class="pchip" data-platform="linkedin"><span class="pdot" style="--c:#4e9bff"></span>LinkedIn</button>
+            </div>
+          </article>
+
+          <article class="card mix-card">
+            <div class="card-head">
+              <div>
+                <h2>Platform mix</h2>
+                <p class="sub">Followers by channel</p>
+              </div>
+            </div>
+            <div id="platform-bars" class="platform-bars"></div>
+            <div class="mix-foot">
+              <span>Total audience</span>
+              <b id="mix-total">112,810</b>
+            </div>
+          </article>
+        </div>
+
+        <div class="grid-secondary">
+          <article class="card table-card">
+            <div class="card-head">
+              <div>
+                <h2>Top performing posts</h2>
+                <p class="sub">Ranked by engagement rate</p>
+              </div>
+              <button type="button" class="link-btn" data-jump="content">View all →</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Post</th>
+                    <th scope="col" class="num hide-sm">Reach</th>
+                    <th scope="col" class="num">Engagement</th>
+                    <th scope="col" class="num hide-sm">Saves</th>
+                  </tr>
+                </thead>
+                <tbody id="top-posts"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="card upcoming-card">
+            <div class="card-head">
+              <div>
+                <h2>Coming up</h2>
+                <p class="sub">Scheduled content</p>
+              </div>
+              <span class="count-pill" id="upcoming-count">0</span>
+            </div>
+            <div id="upcoming-list" class="upcoming-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==================== ANALYTICS ==================== -->
+      <section class="view" data-view="analytics">
+        <div class="mini-stats" id="mini-stats"></div>
+
+        <article class="card chart-card wide">
+          <div class="card-head">
+            <div>
+              <h2>Follower growth by platform</h2>
+              <p class="sub">Each channel's audience over the selected range</p>
+            </div>
+            <div class="legend" id="growth-legend"></div>
+          </div>
+          <div class="chart-wrap" id="multi-wrap">
+            <svg id="multi-chart" viewBox="0 0 960 300" role="img" aria-label="Follower growth by platform chart"></svg>
+            <div class="chart-tip" id="multi-tip" hidden>
+              <span class="tip-date"></span>
+              <div class="tip-rows"></div>
+            </div>
+          </div>
+        </article>
+
+        <div class="grid-secondary analytics-row">
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h2>Format performance</h2>
+                <p class="sub">Share of posts published</p>
+              </div>
+            </div>
+            <div class="donut-row">
+              <div class="donut format-donut" role="img" aria-label="Reels 42 percent, carousels 28 percent, static 18 percent, stories 12 percent">
+                <div class="donut-center"><b>8</b><span>posts</span></div>
+              </div>
+              <ul class="legend-list" id="format-legend"></ul>
+            </div>
+            <p class="note-line">🎯 Reels pull <b>2.4×</b> more reach than static posts.</p>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h2>Engagement by format</h2>
+                <p class="sub">Average rate per post type</p>
+              </div>
+            </div>
+            <div class="hbars" id="format-bars"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==================== CONTENT ==================== -->
+      <section class="view" data-view="content">
+        <div class="content-toolbar">
+          <div class="tabs" id="status-tabs" role="tablist" aria-label="Filter by status">
+            <button type="button" class="tab active" role="tab" aria-selected="true" data-status="all">All <span id="count-all">0</span></button>
+            <button type="button" class="tab" role="tab" aria-selected="false" data-status="published">Published <span id="count-published">0</span></button>
+            <button type="button" class="tab" role="tab" aria-selected="false" data-status="scheduled">Scheduled <span id="count-scheduled">0</span></button>
+            <button type="button" class="tab" role="tab" aria-selected="false" data-status="draft">Drafts <span id="count-draft">0</span></button>
+          </div>
+          <label class="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+            <input type="search" id="content-search" placeholder="Search content…" aria-label="Search content" />
+          </label>
+        </div>
+
+        <div class="content-grid" id="content-list"></div>
+        <div class="empty-state" id="content-empty" hidden>
+          <p class="empty-ico" aria-hidden="true">🗂️</p>
+          <h3>Nothing here yet</h3>
+          <p>Try a different filter or plan something new.</p>
+          <button type="button" class="btn primary" data-new-post>+ New post</button>
+        </div>
+      </section>
+
+      <!-- ==================== AUDIENCE ==================== -->
+      <section class="view" data-view="audience">
+        <div class="mini-stats" id="audience-stats"></div>
+
+        <div class="grid-secondary audience-row">
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h2>Age breakdown</h2>
+                <p class="sub">Share of total followers</p>
+              </div>
+            </div>
+            <div class="donut-row">
+              <div class="donut" role="img" aria-label="Ages 18 to 24: 38 percent, 25 to 34: 34 percent, 35 to 44: 19 percent, 45 plus: 9 percent">
+                <div class="donut-center"><b>112.8k</b><span>followers</span></div>
+              </div>
+              <ul class="legend-list">
+                <li><span class="swatch" style="--c:#7c6cff"></span><span class="leg-label">18–24</span><b>38%</b></li>
+                <li><span class="swatch" style="--c:#3dd6c8"></span><span class="leg-label">25–34</span><b>34%</b></li>
+                <li><span class="swatch" style="--c:#ffb454"></span><span class="leg-label">35–44</span><b>19%</b></li>
+                <li><span class="swatch" style="--c:#ff6b8a"></span><span class="leg-label">45+</span><b>9%</b></li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h2>Top locations</h2>
+                <p class="sub">Where your audience lives</p>
+              </div>
+            </div>
+            <div class="hbars" id="location-bars"></div>
+            <div class="gender">
+              <div class="gender-head"><span>Gender split</span><span class="muted">61% women · 36% men · 3% other</span></div>
+              <div class="gender-bar" role="img" aria-label="61 percent women, 36 percent men, 3 percent other">
+                <span style="width:61%"></span><span style="width:36%"></span><span style="width:3%"></span>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <article class="card">
+          <div class="card-head">
+            <div>
+              <h2>Best time to post</h2>
+              <p class="sub">Average engagement by day and hour</p>
+            </div>
+            <div class="heat-legend" aria-hidden="true"><span>Less</span><i></i><i></i><i></i><i></i><span>More</span></div>
+          </div>
+          <div class="heatmap-wrap">
+            <div class="heatmap" id="heatmap" role="img" aria-label="Heatmap of average engagement by weekday and hour"></div>
+          </div>
+          <p class="note-line">⏰ Your sweet spot: <b>Tuesday and Thursday, 6–8 PM</b> — 31% above your daily average.</p>
+        </article>
+      </section>
+
+      <footer class="foot">
+        Orbit — a vanilla-JS social media dashboard demo by
+        <a href="https://github.com/MuhammadAwais047" target="_blank" rel="noopener noreferrer">Muhammad Awais</a> ·
+        <a href="https://github.com/MuhammadAwais047/social-media-dashboard" target="_blank" rel="noopener noreferrer">Source</a>.
+        All metrics are fictional demo data.
+      </footer>
+    </main>
+  </div>
+
+  <!-- ==================== COMPOSER ==================== -->
+  <div class="modal" id="composer" role="dialog" aria-modal="true" aria-labelledby="composer-title" hidden>
+    <div class="modal-backdrop" data-close-composer></div>
+    <form class="composer-card" id="composer-form" novalidate>
+      <div class="composer-head">
+        <div>
+          <p class="kicker">Plan something good</p>
+          <h2 id="composer-title">New post</h2>
+        </div>
+        <button type="button" class="icon-btn" id="close-composer" aria-label="Close composer">✕</button>
+      </div>
+
+      <label class="field">
+        <span>Title</span>
+        <input type="text" id="post-title" maxlength="90" placeholder="e.g. My 3 favourite editing shortcuts" autocomplete="off" required />
+      </label>
+
+      <div class="field-row">
+        <label class="field">
+          <span>Platform</span>
+          <select id="post-platform">
+            <option value="instagram">Instagram</option>
+            <option value="tiktok">TikTok</option>
+            <option value="x">X</option>
+            <option value="linkedin">LinkedIn</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Format</span>
+          <select id="post-format">
+            <option>Reel</option>
+            <option>Carousel</option>
+            <option>Static</option>
+            <option>Story</option>
+            <option>Thread</option>
+            <option>Text</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Caption <em>optional</em></span>
+        <textarea id="post-caption" rows="3" maxlength="240" placeholder="Add a caption or a note for future you…"></textarea>
+        <small class="char-count"><span id="caption-count">0</span>/240</small>
+      </label>
+
+      <label class="field">
+        <span>Status</span>
+        <select id="post-status">
+          <option value="scheduled">Scheduled</option>
+          <option value="draft">Draft</option>
+        </select>
+      </label>
+
+      <label class="field" id="when-field">
+        <span>Publish at</span>
+        <input type="datetime-local" id="post-when" />
+      </label>
+
+      <p class="form-error" id="form-error" role="alert" hidden></p>
+
+      <div class="composer-actions">
+        <button type="button" class="btn ghost" id="cancel-composer">Cancel</button>
+        <button type="submit" class="btn primary">Save post</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
